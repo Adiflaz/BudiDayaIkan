@@ -1,0 +1,42 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: ⚙️ Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        
+    - name: 🤖 Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: 🔧 Make gradlew executable
+      run: chmod +x gradlew
+      
+    - name: 🏗️ Build Debug APK
+      run: |
+        ./gradlew assembleDebug --no-daemon
+        echo "✅ Build completed!"
+        
+    - name: 📦 Upload APK as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: BudiDayaIkan-Debug-APK
+        path: |
+          app/build/outputs/apk/debug/*.apk
+          app/build/outputs/apk/debug/output.json
+        retention-days: 7
